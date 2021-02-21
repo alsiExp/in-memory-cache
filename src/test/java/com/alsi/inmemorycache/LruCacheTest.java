@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@DisplayName("Lfu cache test")
+@DisplayName("LRU cache test")
 public class LruCacheTest extends BaseCacheTest {
 
     private Cache<Integer, Object> lru;
@@ -25,10 +25,10 @@ public class LruCacheTest extends BaseCacheTest {
 
         fillCacheWithObjectsAndIntegerKeysNTimes(lru, 4);
 
-        assertTrue(lru.contains(3), "Element 3 must be in cache");
-        assertTrue(lru.contains(2), "Element 2 must be in cache");
-        assertTrue(lru.contains(4), "Element 4 must be in cache");
-        assertFalse(lru.contains(1), "Element 1 must be deleted from cache, because max cache size was 3");
+        assertTrue(lru.contains(3), "Key 3 must be in cache");
+        assertTrue(lru.contains(2), "Key 2 must be in cache");
+        assertTrue(lru.contains(4), "Key 4 must be in cache");
+        assertFalse(lru.contains(1), "Key 1 must be deleted from cache, because max cache size was 3");
     }
 
 
@@ -42,5 +42,21 @@ public class LruCacheTest extends BaseCacheTest {
     @Test
     void testTryToCreateCacheWithZeroMaxSize() {
         testThatCacheCanStoreAtLeastOneElement(CacheFactory.get(0, CacheFactory.EvictionStrategy.LEAST_RECENTLY_USED));
+    }
+
+    @DisplayName("cache update position of the element, when somebody put existing key")
+    @Test
+    void testAddNewPairThatAlreadyContainsInCache() {
+        fillCacheWithObjectsAndIntegerKeysNTimes(lru, 4);
+        assertTrue(lru.contains(3), "Key 3 must be in cache");
+        Object objWithKey3 = lru.get(3).orElse(null);
+        assertNotNull(objWithKey3, "Value for key 3 must be not null");
+        lru.put(3, objWithKey3);
+
+        // adding 2 new elements with indexes 10 and 11
+        fillCacheWithObjectsAndIntegerKeysNTimes(lru, 2, 10);
+
+        assertTrue(lru.contains(3), "Key 3 still must be in cache");
+
     }
 }

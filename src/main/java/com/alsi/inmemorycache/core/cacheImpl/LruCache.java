@@ -23,8 +23,25 @@ public class LruCache<K, V> extends AbstractCache<K, V> implements Cache<K, V> {
     @Override
     public void put(K key, V value) {
         checkKey(key);
+        if(storage.containsKey(key)) {
+            putExistedKey(key, value);
+        } else {
+            putNewKey(key, value);
+        }
+    }
+
+    private void putExistedKey(K key, V value) {
+        // no eviction or incrementing curSize need
+        storage.put(key, value);
+
+        // put key in the end if the list
+        keys.remove(key);
+        keys.add(key);
+    }
+
+    private void putNewKey(K key, V value) {
         evictOneIfNeed();
-        storage.put(key,value);
+        storage.put(key, value);
         keys.add(key);
         curSize += 1;
     }

@@ -25,7 +25,12 @@ public class BaseCacheTest {
     }
 
     protected void fillCacheWithObjectsAndIntegerKeysNTimes(Cache<Integer, Object> cache, int nTimesCount) {
-        IntStream.range(1, nTimesCount + 1)
+        fillCacheWithObjectsAndIntegerKeysNTimes(cache, nTimesCount, 1);
+
+    }
+
+    protected void fillCacheWithObjectsAndIntegerKeysNTimes(Cache<Integer, Object> cache, int nTimesCount, int startFromKey) {
+        IntStream.range(startFromKey, startFromKey + nTimesCount)
                 .forEach(index -> cache.put(index, new Object()));
 
     }
