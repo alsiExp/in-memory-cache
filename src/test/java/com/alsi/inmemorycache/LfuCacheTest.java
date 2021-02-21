@@ -11,7 +11,7 @@ import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@DisplayName("Lfu cache test: ")
+@DisplayName("LFU cache test: ")
 public class LfuCacheTest extends BaseCacheTest {
 
     private Cache<Integer, Object> lfu;
@@ -43,7 +43,7 @@ public class LfuCacheTest extends BaseCacheTest {
 
     @DisplayName("cache don't add null as key")
     @Test
-    void tryToAddNullKeyInLfuCache() {
+    void testTryToAddNullKeyInLfuCache() {
         assertThrows(CacheException.class, () -> testTryToAddNullKey(lfu));
     }
 
@@ -51,5 +51,64 @@ public class LfuCacheTest extends BaseCacheTest {
     @Test
     void testTryToCreateCacheWithZeroMaxSize() {
         testThatCacheCanStoreAtLeastOneElement(CacheFactory.get(-5, CacheFactory.EvictionStrategy.LEAST_FREQUENCY_USED));
+    }
+
+    @DisplayName("cache return Optional.empty() for not existed key")
+    @Test
+    void testGetValueFromEmptyCache() {
+        testThatGetObjectFromEmptyCacheFindNothing(lfu);
+    }
+
+    @DisplayName("cache save frequency when put existed key with the same value")
+    @Test
+    void testAddKeyThatAlreadyContainsInCacheWithSameValue() {
+        int keyWithMaxFrequency = 2;
+        int keyWithFrequency_1 = 3;
+        fillCacheWithObjectsAndIntegerKeysNTimes(lfu, 3);
+
+        IntStream.range(0, 3)
+                .forEach(i -> lfu.get(keyWithMaxFrequency));
+        IntStream.range(0, 1)
+                .forEach(i -> lfu.get(keyWithFrequency_1));
+
+        Object obj = lfu.get(keyWithMaxFrequency).orElse(null);
+        assertNotNull(obj);
+
+        lfu.put(keyWithMaxFrequency, obj);
+
+        IntStream.range(5, 10)
+                .forEach(i -> {
+                    lfu.put(i, new Object());
+                    lfu.get(i);
+                    lfu.get(i);
+                });
+        assertTrue(lfu.get(keyWithMaxFrequency).isPresent());
+        assertFalse(lfu.get(keyWithFrequency_1).isPresent());
+    }
+
+    @DisplayName("cache set frequency to zero when put existed key with the new value")
+    @Test
+    void testAddKeyThatAlreadyContainsInCacheWithNewValue() {
+        int keyWithMaxFrequency = 2;
+        int keyWithFrequency_1 = 1;
+        fillCacheWithObjectsAndIntegerKeysNTimes(lfu, 3);
+
+        IntStream.range(0, 3)
+                .forEach(i -> lfu.get(keyWithMaxFrequency));
+        IntStream.range(0, 1)
+                .forEach(i -> lfu.get(keyWithFrequency_1));
+
+        assertTrue(lfu.get(keyWithMaxFrequency).isPresent());
+
+        lfu.put(keyWithMaxFrequency, new Object());
+
+        IntStream.range(5, 10)
+                .forEach(i -> {
+                    lfu.put(i, new Object());
+                    lfu.get(i);
+                    lfu.get(i);
+                });
+        assertFalse(lfu.get(keyWithMaxFrequency).isPresent());
+        assertFalse(lfu.get(keyWithFrequency_1).isPresent());
     }
 }

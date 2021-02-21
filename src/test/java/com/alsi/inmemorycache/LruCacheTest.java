@@ -44,6 +44,12 @@ public class LruCacheTest extends BaseCacheTest {
         testThatCacheCanStoreAtLeastOneElement(CacheFactory.get(0, CacheFactory.EvictionStrategy.LEAST_RECENTLY_USED));
     }
 
+    @DisplayName("cache return Optional.empty() for not existed key")
+    @Test
+    void testGetValueFromEmptyCache() {
+        testThatGetObjectFromEmptyCacheFindNothing(lru);
+    }
+
     @DisplayName("cache update position of the element, when somebody put existing key")
     @Test
     void testAddNewPairThatAlreadyContainsInCache() {
