@@ -3,10 +3,7 @@ package com.alsi.inmemorycache.core.cacheImpl;
 import com.alsi.inmemorycache.core.Cache;
 import com.alsi.inmemorycache.core.utils.CacheException;
 
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 public class LfuCache<K, V> extends AbstractCache<K, V> implements Cache<K, V> {
 
@@ -38,11 +35,31 @@ public class LfuCache<K, V> extends AbstractCache<K, V> implements Cache<K, V> {
     @Override
     public void put(K key, V value) {
         checkKey(key);
+        if(storage.containsKey(key)) {
+            putExistedKey(key, value);
+        } else {
+            putNewKey(key, value);
+        }
+    }
+
+    private void putExistedKey(K key, V value) {
+        V existedValue = storage.get(key);
+        // if existedValue equals value - no actions need
+        // if not - put new value and set frequency for key to zero
+        if(!Objects.equals(value, existedValue)) {
+            storage.put(key, value);
+            keysFrequency.put(key, 0);
+            minFreqKey = key;
+            minFreq = 0;
+        }
+    }
+
+    private void putNewKey(K key, V value) {
         evictOneIfNeed();
         storage.put(key, value);
-        keysFrequency.put(key, 1);
+        keysFrequency.put(key, 0);
         minFreqKey = key;
-        minFreq = 1;
+        minFreq = 0;
         curSize += 1;
     }
 
@@ -59,7 +76,7 @@ public class LfuCache<K, V> extends AbstractCache<K, V> implements Cache<K, V> {
             Map.Entry<K, Integer> minFreqEntry = keysFrequency.entrySet()
                     .stream()
                     .min(Comparator.comparingInt(Map.Entry::getValue))
-                    // newer happens because evict calls only if maxSize == curSize and maxSize always >= 1;
+                    // newer happens because storage is not empty;
                     .orElseThrow(() -> new CacheException("Cache is empty, but was called recalculateMinFrequency method"));
 
             minFreq = minFreqEntry.getValue();
