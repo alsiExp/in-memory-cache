@@ -8,4 +8,7 @@ Please provide an example of usage of the cache as a unit test(s).
 
 ## Implementation details
 1. Cache didn't support null value as a key, if you try to do this *CacheException* will bet thrown
+2. When method *contains(K key)* called for LFU implementation frequency for this pair will be increased
+3. For LRU cache if the same key puts this element of the cache take his place in the end of the queue.
+
 

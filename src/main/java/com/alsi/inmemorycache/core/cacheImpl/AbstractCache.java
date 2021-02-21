@@ -19,7 +19,7 @@ public abstract class AbstractCache<K, V> implements Cache<K, V> {
 
     @Override
     public boolean contains(K key) {
-        return storage.containsKey(key);
+        return this.get(key).isPresent();
     }
 
     protected void evictOneIfNeed() {
