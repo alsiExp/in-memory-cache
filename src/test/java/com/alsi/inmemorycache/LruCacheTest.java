@@ -23,10 +23,7 @@ public class LruCacheTest extends BaseCacheTest {
     @Test
     void lruCacheBaseTest() {
 
-        lru.put(1, new Object());
-        lru.put(2, new Object());
-        lru.put(3, new Object());
-        lru.put(4, new Object());
+        fillCacheWithObjectsAndIntegerKeysNTimes(lru, 4);
 
         assertTrue(lru.contains(3), "Element 3 must be in cache");
         assertTrue(lru.contains(2), "Element 2 must be in cache");
@@ -37,8 +34,13 @@ public class LruCacheTest extends BaseCacheTest {
 
     @DisplayName("cache don't add null as key")
     @Test
-    void tryToAddNullKeyInLruCache() {
-        assertThrows(CacheException.class, () -> tryToAddNullKey(lru));
+    void testTryToAddNullKeyInLruCache() {
+        assertThrows(CacheException.class, () -> testTryToAddNullKey(lru));
     }
 
+    @DisplayName("cache have at least one slot to store object if max size is less that 1")
+    @Test
+    void testTryToCreateCacheWithZeroMaxSize() {
+        testThatCacheCanStoreAtLeastOneElement(CacheFactory.get(0, CacheFactory.EvictionStrategy.LEAST_RECENTLY_USED));
+    }
 }

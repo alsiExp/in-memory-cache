@@ -25,11 +25,7 @@ public class LfuCacheTest extends BaseCacheTest {
     @Test
     void lfuCacheBaseTest() {
 
-        // fill cache
-        lfu.put(1, new Object());
-        lfu.put(2, new Object());
-        lfu.put(3, new Object());
-
+        fillCacheWithObjectsAndIntegerKeysNTimes(lfu, 3);
         // get some elements
         IntStream.range(0, 10)
                 .forEach(i -> lfu.get(3));
@@ -48,6 +44,12 @@ public class LfuCacheTest extends BaseCacheTest {
     @DisplayName("cache don't add null as key")
     @Test
     void tryToAddNullKeyInLfuCache() {
-        assertThrows(CacheException.class, () -> tryToAddNullKey(lfu));
+        assertThrows(CacheException.class, () -> testTryToAddNullKey(lfu));
+    }
+
+    @DisplayName("cache have at least one slot to store object if max size is less that 1")
+    @Test
+    void testTryToCreateCacheWithZeroMaxSize() {
+        testThatCacheCanStoreAtLeastOneElement(CacheFactory.get(-5, CacheFactory.EvictionStrategy.LEAST_FREQUENCY_USED));
     }
 }
